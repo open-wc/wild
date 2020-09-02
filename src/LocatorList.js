@@ -50,6 +50,13 @@ export class LocatorList extends LitElement {
         text-align: center;
       }
 
+      .explainer {
+        font-weight: 300;
+        font-size: 24px;
+        text-align: left;
+        line-height: 34px;
+      }
+
       button {
         background-color: #2758ff;
         border: 0;
@@ -159,10 +166,25 @@ export class LocatorList extends LitElement {
         color: var(--col-active);
       }
 
-      @media (max-width: 480px) {
+      @media (max-width: 960px) {
         svg {
           width: 200px;
           height: 200px;
+        }
+
+        main {
+          padding: 10px;
+        }
+
+        generic-switch {
+          right: 10px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .explainer {
+          font-size: 16px;
+          line-height: 22px;
         }
       }
     `;
@@ -253,6 +275,9 @@ export class LocatorList extends LitElement {
 
         <div class="logo"><a target="_blank" href="https://chrome.google.com/webstore/detail/custom-elements-locator/eccplgjbdhhakefbjfibfhocbmjpkafc">${reticle}</a></div>
         <h1>Custom elements in the wild</h1>
+        <p class="explainer">
+          This page lists sites that make use of custom elements. Sites are automatically and anonymously added by users browsing the web with the <a href="https://chrome.google.com/webstore/detail/custom-elements-locator/eccplgjbdhhakefbjfibfhocbmjpkafc">Custom Elements Locator</a> browser extension.
+        </p>
         ${!this.error
           ? html`
           ${navigator.onLine
