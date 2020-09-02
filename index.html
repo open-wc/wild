@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="Description" content="Put your description here.">
+  <base href="/">
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="icon" type="image/png" href="./images/icons/icon128.png" />
+
+  <style>
+    html {
+      --col-dark: white;
+      --col-darker: #ededed;
+      --col-light: #efefef;
+      --col-active: blue;
+      --text-color: black;
+      --text-color-inv: #ececec;
+      --switch-track: #73767d;
+      --switch-thumb: white;
+      --border-col: #d2d2d2;
+      --component-color: rgb(33, 127, 249);
+    }
+
+    html.dark {
+      --col-dark: #2f3136;
+      --col-darker: #26272b;
+      --col-light: #36393e;
+      --col-active: #41ffb0;
+      --text-color: #ececec;
+      --text-color-inv: #ececec;
+      --switch-track: #a4a4a4;
+      --switch-thumb: white;
+      --border-col: rgb(77, 77, 77);
+      --component-color: rgb(175, 210, 255);
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: sans-serif;
+      background-color: var(--col-light);
+    }
+
+  </style>
+  <title>locator-list</title>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-177073154-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-177073154-1');
+  </script>
+
+</head>
+
+<body>
+  <locator-list></locator-list>
+
+  <script type="module" src="./src/locator-list.js"></script>
+  <script>
+    async function handleServiceWorker() {
+      if ('serviceWorker' in navigator) {
+        const oldReg = await navigator.serviceWorker.getRegistration();
+        let oldSwState;
+        if (oldReg && oldReg.active) {
+          oldSwState = oldReg.active.state;
+        }
+
+        let refreshing;
+
+        navigator.serviceWorker.addEventListener('controllerchange', async () => {
+          if (refreshing) {
+            return;
+          }
+
+          const newReg = await navigator.serviceWorker.getRegistration();
+          let newSwState;
+          if (newReg && newReg.active) {
+            newSwState = newReg.active.state;
+          }
+
+          if (oldSwState === 'activated' && newSwState === 'activating') {
+            refreshing = true;
+            window.location.reload();
+          }
+        });
+      }
+    }
+
+    handleServiceWorker();
+  </script>
+</body>
+
+</html>
