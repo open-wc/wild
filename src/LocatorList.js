@@ -252,7 +252,7 @@ export class LocatorList extends LitElement {
         <generic-switch id="darkmode" label="Toggle darkmode"></generic-switch>
 
         <div class="logo"><a target="_blank" href="https://chrome.google.com/webstore/detail/custom-elements-locator/eccplgjbdhhakefbjfibfhocbmjpkafc">${reticle}</a></div>
-        <h1>Sites using web components</h1>
+        <h1>Custom elements in the wild</h1>
         ${!this.error
           ? html`
           ${navigator.onLine
