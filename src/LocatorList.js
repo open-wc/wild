@@ -91,9 +91,9 @@ export class LocatorList extends LitElement {
       }
 
       generic-switch {
+        margin-left: auto;
         display: block;
-        position: absolute;
-        right: 0;
+        width: max-content;
         font-size: 16px;
       }
 
