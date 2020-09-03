@@ -207,14 +207,11 @@ export class LocatorList extends LitElement {
     super.connectedCallback();
     try {
       col
-        .orderBy('count')
+        .orderBy('count', 'desc')
         .limit(this.limit)
         .get()
         .then(({ docs }) => {
-          this.sites = [
-            ...this.sites,
-            ...docs.map(doc => doc.data()),
-          ].reverse();
+          this.sites = [...this.sites, ...docs.map(doc => doc.data())];
           this.lastVisible = docs[docs.length - 1];
         });
       this.error = false;
