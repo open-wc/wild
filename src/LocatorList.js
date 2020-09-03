@@ -223,7 +223,7 @@ export class LocatorList extends LitElement {
   getSites() {
     if (!this.finished) {
       col
-        .orderBy('site')
+        .orderBy('count', 'desc')
         .startAfter(this.lastVisible)
         .limit(this.limit)
         .get()
