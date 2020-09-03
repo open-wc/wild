@@ -162,7 +162,7 @@ export class LocatorList extends LitElement {
         line-height: 14px;
       }
 
-      a:visited {
+      a, a:visited {
         color: var(--col-active);
       }
 

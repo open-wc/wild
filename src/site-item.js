@@ -47,7 +47,7 @@ class SiteItem extends LitElement {
       ul {
         color: var(--text-color);
         list-style: none;
-        padding-left: 0;
+        padding: 15px;
         text-align: left;
         font-size: 16px;
         line-height: 34px;
