@@ -1,19 +1,20 @@
+/* eslint-disable no-nested-ternary */
 import { LitElement, html, css } from 'lit-element';
 import firebase from 'firebase/app';
 import 'firebase/firestore';
 import '@thepassle/generic-components/generic-disclosure.js';
 import '@thepassle/generic-components/generic-switch.js';
+import { installDarkModeHandler } from 'pwa-helper-components';
 import { reticle } from './icons/index.js';
 import './site-item.js';
-import { installDarkModeHandler } from 'pwa-helper-components';
 
 firebase.initializeApp({
   apiKey: 'AIzaSyDHaekG4-W4Zv7FLHdai8uqGwHKV0zKTpw',
-  authDomain: "locator-a6a89.firebaseapp.com",
-  projectId: "locator-a6a89",
+  authDomain: 'locator-a6a89.firebaseapp.com',
+  projectId: 'locator-a6a89',
 });
 
-const col = firebase.firestore().collection("sites");
+const col = firebase.firestore().collection('sites');
 
 /**
  * @typedef {Object} Site
@@ -26,12 +27,12 @@ export class LocatorList extends LitElement {
     return {
       title: { type: String },
       page: { type: String },
-      index: { type: Number},
-      limit: { type: Number},
+      index: { type: Number },
+      limit: { type: Number },
       sites: { type: Array },
       error: { type: Boolean },
       lastVisible: {},
-      finished: { type: Boolean},
+      finished: { type: Boolean },
     };
   }
 
@@ -68,11 +69,14 @@ export class LocatorList extends LitElement {
         border: solid 2px var(--border-col);
       }
 
-      button:hover, button:focus, button:active {
+      button:hover,
+      button:focus,
+      button:active {
         background-color: #388cfa;
       }
 
-      h1, p {
+      h1,
+      p {
         color: var(--text-color);
       }
 
@@ -162,7 +166,8 @@ export class LocatorList extends LitElement {
         line-height: 14px;
       }
 
-      a, a:visited {
+      a,
+      a:visited {
         color: var(--col-active);
       }
 
@@ -201,10 +206,17 @@ export class LocatorList extends LitElement {
   async connectedCallback() {
     super.connectedCallback();
     try {
-      col.orderBy("site").limit(this.limit).get().then(({docs}) => {
-        this.sites = [...this.sites, ...docs.map(doc => doc.data())];
-        this.lastVisible = docs[docs.length - 1];
-      });
+      col
+        .orderBy('count')
+        .limit(this.limit)
+        .get()
+        .then(({ docs }) => {
+          this.sites = [
+            ...this.sites,
+            ...docs.map(doc => doc.data()),
+          ].reverse();
+          this.lastVisible = docs[docs.length - 1];
+        });
       this.error = false;
     } catch {
       this.error = true;
@@ -212,21 +224,26 @@ export class LocatorList extends LitElement {
   }
 
   getSites() {
-    if(!this.finished) {
-      col.orderBy("site").startAfter(this.lastVisible).limit(this.limit).get().then(({docs}) => {
-        this.sites = [...this.sites, ...docs.map(doc => doc.data())];
-        this.lastVisible = docs[docs.length - 1];
+    if (!this.finished) {
+      col
+        .orderBy('site')
+        .startAfter(this.lastVisible)
+        .limit(this.limit)
+        .get()
+        .then(({ docs }) => {
+          this.sites = [...this.sites, ...docs.map(doc => doc.data())];
+          this.lastVisible = docs[docs.length - 1];
 
-        if(docs[docs.length - 1] === undefined) {
-          this.finished = true;
-        }
-      });
+          if (docs[docs.length - 1] === undefined) {
+            this.finished = true;
+          }
+        });
     }
   }
 
   firstUpdated() {
-
     const darkModeToggle = this.shadowRoot.getElementById('darkmode');
+    /* eslint-disable-next-line */
     const html = document.getElementsByTagName('html')[0];
 
     function handleToggle() {
@@ -239,8 +256,8 @@ export class LocatorList extends LitElement {
       }
     }
 
-    installDarkModeHandler((darkmode) => {
-      if(darkmode) {
+    installDarkModeHandler(darkmode => {
+      if (darkmode) {
         darkModeToggle.setAttribute('checked', '');
         html.classList.add('dark');
       } else {
@@ -250,10 +267,10 @@ export class LocatorList extends LitElement {
     });
 
     ['keydown', 'click'].forEach(event => {
-      darkModeToggle.addEventListener(event, (e) => {
-        switch(event) {
+      darkModeToggle.addEventListener(event, e => {
+        switch (event) {
           case 'keydown':
-            if(e.keyCode === 32 || e.keyCode === 13) {
+            if (e.keyCode === 32 || e.keyCode === 13) {
               e.preventDefault();
               handleToggle();
             }
@@ -273,37 +290,48 @@ export class LocatorList extends LitElement {
       <main>
         <generic-switch id="darkmode" label="Toggle darkmode"></generic-switch>
 
-        <div class="logo"><a target="_blank" href="https://chrome.google.com/webstore/detail/custom-elements-locator/eccplgjbdhhakefbjfibfhocbmjpkafc">${reticle}</a></div>
+        <div class="logo">
+          <a
+            target="_blank"
+            href="https://chrome.google.com/webstore/detail/custom-elements-locator/eccplgjbdhhakefbjfibfhocbmjpkafc"
+            >${reticle}</a
+          >
+        </div>
         <h1>Custom elements in the wild</h1>
         <p class="explainer">
-          This page lists sites that make use of custom elements. Sites are automatically and anonymously added by users browsing the web with the <a href="https://chrome.google.com/webstore/detail/custom-elements-locator/eccplgjbdhhakefbjfibfhocbmjpkafc">Custom Elements Locator</a> browser extension.
+          This page lists sites that make use of custom elements. Sites are
+          automatically and anonymously added by users browsing the web with the
+          <a
+            href="https://chrome.google.com/webstore/detail/custom-elements-locator/eccplgjbdhhakefbjfibfhocbmjpkafc"
+            >Custom Elements Locator</a
+          >
+          browser extension.
         </p>
         ${!this.error
           ? html`
-          ${navigator.onLine
-            ? html`
-              <ul>
-                ${this.sites.map(({site, components}) => html`
-                  <li>
-                    <site-item .site=${site} .components=${components}></site-item>
-                  </li>
-                `)}
-              </ul>
+              ${navigator.onLine
+                ? html`
+                    <ul>
+                      ${this.sites.map(
+                        ({ site, components }) => html`
+                          <li>
+                            <site-item
+                              .site=${site}
+                              .components=${components}
+                            ></site-item>
+                          </li>
+                        `
+                      )}
+                    </ul>
+                  `
+                : html`<p>Uh oh! Looks like you're not online</p>`}
             `
-            : html`<p>Uh oh! Looks like you're not online</p>`
-
-          }
-          `
-          : html`<p>Something went wrong!</p>`
-        }
-
+          : html`<p>Something went wrong!</p>`}
         ${navigator.onLine
           ? !this.finished
-              ? html`<button @click=${this.getSites}>Find more</button>`
-              : html`<p>No more sites found!</p>`
-          : ''
-        }
-
+            ? html`<button @click=${this.getSites}>Find more</button>`
+            : html`<p>No more sites found!</p>`
+          : ''}
       </main>
 
       <p class="app-footer">
