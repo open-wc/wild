@@ -51,7 +51,7 @@
   "author": "locator-list",
   "license": "MIT",
   "dependencies": {
-    "@thepassle/generic-components": "^0.1.4",
+    "@thepassle/generic-components": "^0.1.5",
     "firebase": "^7.19.1",
     "lit-element": "^2.0.1",
     "lit-html": "^1.0.0",
