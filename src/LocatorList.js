@@ -370,6 +370,7 @@ export class LocatorList extends LitElement {
   }
 
   render() {
+    console.log('test');
     return html`
       <main>
         <div class="header">
