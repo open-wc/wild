@@ -1,42 +1,25 @@
 /* eslint-disable no-nested-ternary */
 import { LitElement, html, css } from 'lit-element';
 import { render } from 'lit-html';
+import { dialog } from '@thepassle/generic-components/generic-dialog/dialog.js';
+import { addPwaUpdateListener } from 'pwa-helper-components';
+
 import firebase from 'firebase/app';
 import 'firebase/firestore';
+
 import '@thepassle/generic-components/generic-disclosure.js';
 import '@thepassle/generic-components/generic-switch.js';
-import { dialog } from '@thepassle/generic-components/generic-dialog/dialog.js';
-import { installDarkModeHandler } from 'pwa-helper-components';
-import { addPwaUpdateListener } from 'pwa-helper-components';
 import 'pwa-helper-components/pwa-update-available.js';
-import {satisfies} from 'es-semver';
+
 import { reticle, cross } from './icons/index.js';
-import './site-item.js';
+import {
+  switchStyles,
+  getChanged,
+  skipWaiting,
+  setupDarkmode,
+} from './utils.js';
 import version from './version.js';
-
-async function getChanged(version) {
-  const { Changelog } = await(await fetch('./CHANGELOG.json')).json();
-  return Object.keys(Changelog)
-    .filter(item => satisfies(item, `>${version}`))
-    .map(item => html`
-      <li>
-        <h2>${item}</h2>
-        <div class="changelog">${Changelog[item].raw}</div>
-      </li>
-    `);
-}
-
-async function skipWaiting() {
-  const reg = await navigator.serviceWorker.getRegistration();
-  reg.waiting.postMessage({ type: 'SKIP_WAITING' });
-}
-
-let refreshing;
-navigator.serviceWorker.addEventListener('controllerchange', () => {
-  if (refreshing) return;
-  window.location.reload();
-  refreshing = true;
-});
+import './site-item.js';
 
 console.log(`[Custom Elements in the wild] version: ${version}`);
 
@@ -47,12 +30,6 @@ firebase.initializeApp({
 });
 
 const col = firebase.firestore().collection('sites');
-
-/**
- * @typedef {Object} Site
- * @property {string} site
- * @property {string[]} components
- */
 
 export class LocatorList extends LitElement {
   static get properties() {
@@ -163,8 +140,9 @@ export class LocatorList extends LitElement {
         padding-top: 36px;
       }
 
-      .logo > svg {
-        /* transform: rotate(90deg); */
+      .find-more {
+        margin-left: auto;
+        margin-right: auto;
       }
 
       .app-footer {
@@ -176,52 +154,7 @@ export class LocatorList extends LitElement {
         margin-left: 5px;
       }
 
-      generic-switch::part(button) {
-        height: 20px;
-        width: 40px;
-      }
-
-      generic-switch::part(thumb) {
-        top: -1px;
-        right: 20px;
-        border: solid 2px #4d4d4d;
-        border-radius: 50%;
-        width: calc(50% - 2px);
-        height: calc(100% - 2px);
-        background-color: white;
-      }
-      generic-switch[checked]::part(thumb) {
-        right: 0px;
-      }
-      generic-switch::part(track) {
-        border-top-left-radius: 10px;
-        border-bottom-left-radius: 10px;
-        border-top-right-radius: 10px;
-        border-bottom-right-radius: 10px;
-        background-color: var(--switch-track);
-      }
-
-      generic-switch[checked]::part(track)::before {
-        position: absolute;
-        left: 2px;
-        top: 4px;
-        line-height: 14px;
-      }
-
-      generic-switch#darkmode[checked]::part(track)::before {
-        content: '🌞';
-      }
-
-      generic-switch#darkmode::part(track)::before {
-        content: '🌛';
-      }
-
-      generic-switch::part(track)::before {
-        position: absolute;
-        left: 22px;
-        top: 4px;
-        line-height: 14px;
-      }
+      ${switchStyles()}
 
       a,
       a:visited {
@@ -254,7 +187,6 @@ export class LocatorList extends LitElement {
 
   constructor() {
     super();
-    /** @type {Site[]} */
     this.sites = [];
     this.index = 0;
     this.limit = 25;
@@ -277,7 +209,7 @@ export class LocatorList extends LitElement {
       this.error = true;
     }
 
-    addPwaUpdateListener((updateAvailable) => {
+    addPwaUpdateListener(updateAvailable => {
       this.updateAvailable = updateAvailable;
     });
   }
@@ -302,83 +234,57 @@ export class LocatorList extends LitElement {
 
   firstUpdated() {
     const darkModeToggle = this.shadowRoot.getElementById('darkmode');
-    /* eslint-disable-next-line */
-    const html = document.getElementsByTagName('html')[0];
-
-    function handleToggle() {
-      if (html.classList.contains('dark')) {
-        html.classList.remove('dark');
-        localStorage.setItem('darkmode', 'false');
-      } else {
-        html.classList.add('dark');
-        localStorage.setItem('darkmode', 'true');
-      }
-    }
-
-    installDarkModeHandler(darkmode => {
-      if (darkmode) {
-        darkModeToggle.setAttribute('checked', '');
-        html.classList.add('dark');
-      } else {
-        darkModeToggle.removeAttribute('checked');
-        html.classList.remove('dark');
-      }
-    });
-
-    ['keydown', 'click'].forEach(event => {
-      darkModeToggle.addEventListener(event, e => {
-        switch (event) {
-          case 'keydown':
-            if (e.keyCode === 32 || e.keyCode === 13) {
-              e.preventDefault();
-              handleToggle();
-            }
-            break;
-          case 'click':
-            handleToggle();
-            break;
-          default:
-            break;
-        }
-      });
-    });
+    setupDarkmode(darkModeToggle);
   }
 
-  // eslint-disable-next-line
+  // eslint-disable-next-line class-methods-use-this
   async openDialog(e) {
     const changed = await getChanged(version);
-
     dialog.open({
-      invokerNode: e.target,
-      content: (dialogNode) => {
+      invokerNode: e.target.shadowRoot.querySelector('.update'),
+      content: dialogNode => {
+        // eslint-disable-next-line
         dialogNode.id = 'dialog';
 
-        render(html`
-          <button @click=${() => dialog.close()} class="close button">${cross}</button>
-          <h1>There's an update available!</h1>
-          <p>Here's what's changed:</p>
-          <ul>
-            ${changed}
-          </ul>
-          <div class="dialog-buttons">
-            <button class="button" @click=${skipWaiting}>Install update</button>
-            <button class="button" @click=${() => dialog.close()}>Close</button>
-          </div>
-        `, dialogNode);
-      }
-    })
+        render(
+          html`
+            <button @click=${() => dialog.close()} class="close button">
+              ${cross}
+            </button>
+            <h1>There's an update available!</h1>
+            <p>Here's what's changed:</p>
+            <ul>
+              ${changed}
+            </ul>
+            <div class="dialog-buttons">
+              <button class="button" @click=${skipWaiting}>
+                Install update
+              </button>
+              <button class="button" @click=${() => dialog.close()}>
+                Close
+              </button>
+            </div>
+          `,
+          dialogNode
+        );
+      },
+    });
   }
 
   render() {
-    console.log('test');
     return html`
       <main>
         <div class="header">
           ${this.updateAvailable
-            ? html`<button @click=${this.openDialog} class="update button">Hey!<div class="dot"></div></button>`
-            : ''
-          }
-          <generic-switch id="darkmode" label="Toggle darkmode"></generic-switch>
+            ? html`<button @click=${this.openDialog} class="update button">
+                Hey!
+                <div class="dot"></div>
+              </button>`
+            : ''}
+          <generic-switch
+            id="darkmode"
+            label="Toggle darkmode"
+          ></generic-switch>
         </div>
 
         <div class="logo">
@@ -415,12 +321,14 @@ export class LocatorList extends LitElement {
                       )}
                     </ul>
                   `
-                : html`<p>Uh oh! Looks like you're not online</p>`}
+                : html`<p>Uh oh! Looks like you're not online ☹️</p>`}
             `
           : html`<p>Something went wrong!</p>`}
         ${navigator.onLine
           ? !this.finished
-            ? html`<button class="load-more" @click=${this.getSites}>Find more</button>`
+            ? html`<button class="button find-more" @click=${this.getSites}>
+                Find more
+              </button>`
             : html`<p>No more sites found!</p>`
           : ''}
       </main>

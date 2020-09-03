@@ -1,3 +1,4 @@
+// eslint-disable-next-line
 import merge from 'deepmerge';
 import { createSpaConfig } from '@open-wc/building-rollup';
 import copy from 'rollup-plugin-copy';
@@ -25,24 +26,29 @@ export default merge(baseConfig, {
       targets: [
         { src: 'images/icons/**/*', dest: 'dist/images/' },
         { src: 'manifest.json', dest: 'dist/' },
+        { src: 'manifest-dark.json', dest: 'dist/' },
       ],
-      flatten: false
+      flatten: false,
     }),
     {
       name: 'version',
       load(id) {
+        // eslint-disable-line
         // replace the version module with a live version from the package.json
         if (id === versionModulePath) {
           return `export default '${packageJson.version}'`;
         }
-      }
+      },
     },
     {
       name: 'generateChangelog',
       buildEnd() {
         const changelog = fs.readFileSync('./CHANGELOG.md', 'utf8');
-        fs.writeFileSync('./dist/CHANGELOG.json', JSON.stringify(md2json.parse(changelog)));
-      }
-    }
-  ]
+        fs.writeFileSync(
+          './dist/CHANGELOG.json',
+          JSON.stringify(md2json.parse(changelog))
+        );
+      },
+    },
+  ],
 });
