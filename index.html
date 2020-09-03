@@ -20,6 +20,7 @@
       --col-darker: #ededed;
       --col-light: #efefef;
       --col-active: blue;
+      --col-active-hover: rgba(0,0,255,0.1);
       --text-color: black;
       --text-color-inv: #ececec;
       --switch-track: #73767d;
@@ -33,6 +34,7 @@
       --col-darker: #26272b;
       --col-light: #36393e;
       --col-active: #41ffb0;
+      --col-active-hover: rgba(65,255,176,0.1);
       --text-color: #ececec;
       --text-color-inv: #ececec;
       --switch-track: #a4a4a4;
@@ -49,6 +51,66 @@
       background-color: var(--col-light);
     }
 
+    #dialog {
+      background-color: var(--col-light);
+      width: 450px;
+      height: 400px;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0px 2px 5px 0px rgba(0,0,0,0.75);
+      color: var(--text-color);
+      overflow: auto;
+    }
+
+    ul {
+      padding-left: 0;
+      list-style: none;
+    }
+
+    .changelog {
+      white-space: pre;
+    }
+
+    .button {
+      fill: var(--col-active);
+      background: transparent;
+      border: none;
+      display: block;
+      font-size: 16px;
+      /* line-height: 14px; */
+      color: var(--col-active);
+      position: relative;
+      border: solid 2px var(--col-active);
+      border-radius: 10px;
+      padding: 5px 10px 5px 10px;
+    }
+
+    .button:hover,
+    .button:active,
+    .button:focus {
+      background: var(--col-active-hover);
+    }
+
+    .dialog-buttons {
+      display: flex;
+    }
+
+    .dialog-buttons button:first-child {
+      margin-right: 10px;
+    }
+
+    .close {
+      margin-left: auto;
+      line-height: 14px;
+      padding: 5px 5px 5px 5px;
+    }
+
+    @media (max-width: 480px) {
+      #dialog {
+        width: calc(100vw - 40px);
+        height: 75vh;
+      }
+    }
   </style>
   <title>Custom Elements in the wild</title>
   <script async src="https://www.googletagmanager.com/gtag/js?id=UA-177073154-1"></script>
