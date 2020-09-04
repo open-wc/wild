@@ -11,7 +11,7 @@ import '@thepassle/generic-components/generic-disclosure.js';
 import '@thepassle/generic-components/generic-switch.js';
 import 'pwa-helper-components/pwa-update-available.js';
 
-import { reticle } from './icons/index.js';
+import { reticle, loading, loadingStyles } from './icons/index.js';
 import { switchStyles, setupDarkmode } from './utils.js';
 import version from './version.js';
 import './site-item.js';
@@ -36,6 +36,7 @@ export class LocatorList extends LitElement {
       limit: { type: Number },
       sites: { type: Array },
       error: { type: Boolean },
+      loading: { type: Boolean },
       lastVisible: {},
       finished: { type: Boolean },
       updateAvailable: { type: Boolean },
@@ -44,6 +45,7 @@ export class LocatorList extends LitElement {
 
   static get styles() {
     return css`
+      ${loadingStyles}
       :host {
         min-height: 100vh;
         display: flex;
@@ -187,6 +189,7 @@ export class LocatorList extends LitElement {
     this.index = 0;
     this.limit = 25;
     this.updateAvailable = false;
+    this.loading = true;
   }
 
   async connectedCallback() {
@@ -199,10 +202,13 @@ export class LocatorList extends LitElement {
         .then(({ docs }) => {
           this.sites = [...this.sites, ...docs.map(doc => doc.data())];
           this.lastVisible = docs[docs.length - 1];
+
+          this.error = false;
+          this.loading = false;
         });
-      this.error = false;
     } catch {
       this.error = true;
+      this.loading = false;
     }
 
     addPwaUpdateListener(updateAvailable => {
@@ -280,6 +286,8 @@ export class LocatorList extends LitElement {
           >
           browser extension.
         </p>
+
+        ${this.loading ? loading : ''}
         ${!this.error
           ? html`
               ${navigator.onLine
@@ -296,17 +304,20 @@ export class LocatorList extends LitElement {
                         `
                       )}
                     </ul>
+                    ${!this.loading
+                      ? !this.finished
+                        ? html`<button
+                            class="button find-more"
+                            @click=${this.getSites}
+                          >
+                            Find more
+                          </button>`
+                        : html`<p>No more sites found!</p>`
+                      : ''}
                   `
                 : html`<p>Uh oh! Looks like you're not online ☹️</p>`}
             `
           : html`<p>Something went wrong!</p>`}
-        ${navigator.onLine
-          ? !this.finished
-            ? html`<button class="button find-more" @click=${this.getSites}>
-                Find more
-              </button>`
-            : html`<p>No more sites found!</p>`
-          : ''}
       </main>
 
       <p class="app-footer">

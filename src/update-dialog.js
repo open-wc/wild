@@ -1,27 +1,21 @@
-import { html, css, LitElement } from 'lit-element';
+import { html, LitElement } from 'lit-element';
 import { dialog } from '@thepassle/generic-components/generic-dialog/dialog.js';
 import { getChanged, skipWaiting } from './utils.js';
 import version from './version.js';
-import { cross } from './icons/index.js';
+import { cross, loading } from './icons/index.js';
 
 class UpdateDialog extends LitElement {
   static get properties() {
     return {
       changed: { type: Array },
+      loading: { type: Boolean },
     };
-  }
-
-  static get styles() {
-    return css`
-      :host {
-        display: block;
-      }
-    `;
   }
 
   constructor() {
     super();
     this.changed = [];
+    this.loading = true;
   }
 
   createRenderRoot() {
@@ -31,6 +25,7 @@ class UpdateDialog extends LitElement {
   async connectedCallback() {
     super.connectedCallback();
     this.changed = await getChanged(version);
+    this.loading = false;
   }
 
   render() {
@@ -39,9 +34,9 @@ class UpdateDialog extends LitElement {
         ${cross}
       </button>
       <h1>There's an update available!</h1>
-      <p>Here's what has changed:</p>
+      <p>Here's what's changed:</p>
       <ul>
-        ${this.changed}
+        ${this.loading ? loading : this.changed}
       </ul>
       <div class="dialog-buttons">
         <button class="button" @click=${skipWaiting}>Install update</button>
