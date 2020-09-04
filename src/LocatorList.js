@@ -11,15 +11,11 @@ import '@thepassle/generic-components/generic-disclosure.js';
 import '@thepassle/generic-components/generic-switch.js';
 import 'pwa-helper-components/pwa-update-available.js';
 
-import { reticle, cross } from './icons/index.js';
-import {
-  switchStyles,
-  getChanged,
-  skipWaiting,
-  setupDarkmode,
-} from './utils.js';
+import { reticle } from './icons/index.js';
+import { switchStyles, setupDarkmode } from './utils.js';
 import version from './version.js';
 import './site-item.js';
+import './update-dialog.js';
 
 console.log(`[Custom Elements in the wild] version: ${version}`);
 
@@ -238,35 +234,13 @@ export class LocatorList extends LitElement {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  async openDialog(e) {
-    const changed = await getChanged(version);
+  openDialog(e) {
     dialog.open({
-      invokerNode: e.target.shadowRoot.querySelector('.update'),
+      invokerNode: e.target,
       content: dialogNode => {
         // eslint-disable-next-line
         dialogNode.id = 'dialog';
-
-        render(
-          html`
-            <button @click=${() => dialog.close()} class="close button">
-              ${cross}
-            </button>
-            <h1>There's an update available!</h1>
-            <p>Here's what's changed:</p>
-            <ul>
-              ${changed}
-            </ul>
-            <div class="dialog-buttons">
-              <button class="button" @click=${skipWaiting}>
-                Install update
-              </button>
-              <button class="button" @click=${() => dialog.close()}>
-                Close
-              </button>
-            </div>
-          `,
-          dialogNode
-        );
+        render(html`<update-dialog></update-dialog>`, dialogNode);
       },
     });
   }
@@ -290,6 +264,7 @@ export class LocatorList extends LitElement {
         <div class="logo">
           <a
             target="_blank"
+            rel="noopener noreferrer"
             href="https://chrome.google.com/webstore/detail/custom-elements-locator/eccplgjbdhhakefbjfibfhocbmjpkafc"
             >${reticle}</a
           >
@@ -299,6 +274,7 @@ export class LocatorList extends LitElement {
           This page lists sites that make use of custom elements. Sites are
           automatically and anonymously added by users browsing the web with the
           <a
+            rel="noopener noreferrer"
             href="https://chrome.google.com/webstore/detail/custom-elements-locator/eccplgjbdhhakefbjfibfhocbmjpkafc"
             >Custom Elements Locator</a
           >

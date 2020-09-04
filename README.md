@@ -1,19 +1,38 @@
 <p align="center">
-  <img width="200" src="https://open-wc.org/hero.png"></img>
+  <img width="128" src="/images/icons/icon128.png"></img>
 </p>
 
-## Open-wc Starter App
+## Custom Elements in the wild
 
-[![Built with open-wc recommendations](https://img.shields.io/badge/built%20with-open--wc-blue.svg)](https://github.com/open-wc)
+[![Built with open-wc recommendations](https://img.shields.io/badge/built%20with-open--wc-blue.svg)](https://github.com/open-wc) 
+
+[Visit site](https://wild.open-wc.org)
 
 ## Quickstart
 
 To get started:
 
 ```bash
-npm init @open-wc
-# requires node 10 & npm 6 or higher
+npm install
+npm start
 ```
+
+## Testing the service worker
+
+- `npm run build`
+- `cd dist && http-server -o`
+- open browser
+
+If you want to test the update flow as well, continue here:
+
+- make a change to the code
+- `npm run build`
+- `cd dist && http-server -o`
+- open browser
+
+## Contributing
+
+This project makes use of a semver-based service worker update pattern. Every update should be done via a pull request to the `master` branch, and all pull requests should contain an updated `CHANGELOG.md` and a version bump in the `package.json`.
 
 ## Scripts
 
