@@ -1,12 +1,23 @@
 /* eslint-disable no-nested-ternary */
 import { LitElement, html, css } from 'lit-element';
+import { render } from 'lit-html';
+import { dialog } from '@thepassle/generic-components/generic-dialog/dialog.js';
+import { addPwaUpdateListener } from 'pwa-helper-components';
+
 import firebase from 'firebase/app';
 import 'firebase/firestore';
+
 import '@thepassle/generic-components/generic-disclosure.js';
 import '@thepassle/generic-components/generic-switch.js';
-import { installDarkModeHandler } from 'pwa-helper-components';
-import { reticle } from './icons/index.js';
+import 'pwa-helper-components/pwa-update-available.js';
+
+import { reticle, loading, loadingStyles } from './icons/index.js';
+import { switchStyles, setupDarkmode } from './utils.js';
+import version from './version.js';
 import './site-item.js';
+import './update-dialog.js';
+
+console.log(`[Custom Elements in the wild] version: ${version}`);
 
 firebase.initializeApp({
   apiKey: 'AIzaSyDHaekG4-W4Zv7FLHdai8uqGwHKV0zKTpw',
@@ -15,12 +26,6 @@ firebase.initializeApp({
 });
 
 const col = firebase.firestore().collection('sites');
-
-/**
- * @typedef {Object} Site
- * @property {string} site
- * @property {string[]} components
- */
 
 export class LocatorList extends LitElement {
   static get properties() {
@@ -31,13 +36,16 @@ export class LocatorList extends LitElement {
       limit: { type: Number },
       sites: { type: Array },
       error: { type: Boolean },
+      loading: { type: Boolean },
       lastVisible: {},
       finished: { type: Boolean },
+      updateAvailable: { type: Boolean },
     };
   }
 
   static get styles() {
     return css`
+      ${loadingStyles}
       :host {
         min-height: 100vh;
         display: flex;
@@ -51,6 +59,30 @@ export class LocatorList extends LitElement {
         text-align: center;
       }
 
+      .header {
+        display: flex;
+      }
+
+      .button {
+        fill: var(--col-active);
+        background: transparent;
+        border: none;
+        display: block;
+        font-size: 16px;
+        /* line-height: 14px; */
+        color: var(--col-active);
+        position: relative;
+        border: solid 2px var(--col-active);
+        border-radius: 10px;
+        padding: 5px 10px 5px 10px;
+      }
+
+      .button:hover,
+      .button:active,
+      .button:focus {
+        background: var(--col-active-hover);
+      }
+
       .explainer {
         font-weight: 300;
         font-size: 24px;
@@ -58,7 +90,7 @@ export class LocatorList extends LitElement {
         line-height: 34px;
       }
 
-      button {
+      button.load-more {
         background-color: #2758ff;
         border: 0;
         border-radius: 10px;
@@ -69,9 +101,9 @@ export class LocatorList extends LitElement {
         border: solid 2px var(--border-col);
       }
 
-      button:hover,
-      button:focus,
-      button:active {
+      button:hover.load-more,
+      button:focus.load-more,
+      button:active.load-more {
         background-color: #388cfa;
       }
 
@@ -106,8 +138,9 @@ export class LocatorList extends LitElement {
         padding-top: 36px;
       }
 
-      .logo > svg {
-        /* transform: rotate(90deg); */
+      .find-more {
+        margin-left: auto;
+        margin-right: auto;
       }
 
       .app-footer {
@@ -119,52 +152,7 @@ export class LocatorList extends LitElement {
         margin-left: 5px;
       }
 
-      generic-switch::part(button) {
-        height: 20px;
-        width: 40px;
-      }
-
-      generic-switch::part(thumb) {
-        top: -1px;
-        right: 20px;
-        border: solid 2px #4d4d4d;
-        border-radius: 50%;
-        width: calc(50% - 2px);
-        height: calc(100% - 2px);
-        background-color: white;
-      }
-      generic-switch[checked]::part(thumb) {
-        right: 0px;
-      }
-      generic-switch::part(track) {
-        border-top-left-radius: 10px;
-        border-bottom-left-radius: 10px;
-        border-top-right-radius: 10px;
-        border-bottom-right-radius: 10px;
-        background-color: var(--switch-track);
-      }
-
-      generic-switch[checked]::part(track)::before {
-        position: absolute;
-        left: 2px;
-        top: 4px;
-        line-height: 14px;
-      }
-
-      generic-switch#darkmode[checked]::part(track)::before {
-        content: '🌞';
-      }
-
-      generic-switch#darkmode::part(track)::before {
-        content: '🌛';
-      }
-
-      generic-switch::part(track)::before {
-        position: absolute;
-        left: 22px;
-        top: 4px;
-        line-height: 14px;
-      }
+      ${switchStyles()}
 
       a,
       a:visited {
@@ -197,10 +185,11 @@ export class LocatorList extends LitElement {
 
   constructor() {
     super();
-    /** @type {Site[]} */
     this.sites = [];
     this.index = 0;
     this.limit = 25;
+    this.updateAvailable = false;
+    this.loading = true;
   }
 
   async connectedCallback() {
@@ -213,11 +202,18 @@ export class LocatorList extends LitElement {
         .then(({ docs }) => {
           this.sites = [...this.sites, ...docs.map(doc => doc.data())];
           this.lastVisible = docs[docs.length - 1];
+
+          this.error = false;
+          this.loading = false;
         });
-      this.error = false;
     } catch {
       this.error = true;
+      this.loading = false;
     }
+
+    addPwaUpdateListener(updateAvailable => {
+      this.updateAvailable = updateAvailable;
+    });
   }
 
   getSites() {
@@ -240,56 +236,41 @@ export class LocatorList extends LitElement {
 
   firstUpdated() {
     const darkModeToggle = this.shadowRoot.getElementById('darkmode');
-    /* eslint-disable-next-line */
-    const html = document.getElementsByTagName('html')[0];
+    setupDarkmode(darkModeToggle);
+  }
 
-    function handleToggle() {
-      if (html.classList.contains('dark')) {
-        html.classList.remove('dark');
-        localStorage.setItem('darkmode', 'false');
-      } else {
-        html.classList.add('dark');
-        localStorage.setItem('darkmode', 'true');
-      }
-    }
-
-    installDarkModeHandler(darkmode => {
-      if (darkmode) {
-        darkModeToggle.setAttribute('checked', '');
-        html.classList.add('dark');
-      } else {
-        darkModeToggle.removeAttribute('checked');
-        html.classList.remove('dark');
-      }
-    });
-
-    ['keydown', 'click'].forEach(event => {
-      darkModeToggle.addEventListener(event, e => {
-        switch (event) {
-          case 'keydown':
-            if (e.keyCode === 32 || e.keyCode === 13) {
-              e.preventDefault();
-              handleToggle();
-            }
-            break;
-          case 'click':
-            handleToggle();
-            break;
-          default:
-            break;
-        }
-      });
+  // eslint-disable-next-line class-methods-use-this
+  openDialog(e) {
+    dialog.open({
+      invokerNode: e.target,
+      content: dialogNode => {
+        // eslint-disable-next-line
+        dialogNode.id = 'dialog';
+        render(html`<update-dialog></update-dialog>`, dialogNode);
+      },
     });
   }
 
   render() {
     return html`
       <main>
-        <generic-switch id="darkmode" label="Toggle darkmode"></generic-switch>
+        <div class="header">
+          ${this.updateAvailable
+            ? html`<button @click=${this.openDialog} class="update button">
+                Hey!
+                <div class="dot"></div>
+              </button>`
+            : ''}
+          <generic-switch
+            id="darkmode"
+            label="Toggle darkmode"
+          ></generic-switch>
+        </div>
 
         <div class="logo">
           <a
             target="_blank"
+            rel="noopener noreferrer"
             href="https://chrome.google.com/webstore/detail/custom-elements-locator/eccplgjbdhhakefbjfibfhocbmjpkafc"
             >${reticle}</a
           >
@@ -299,11 +280,14 @@ export class LocatorList extends LitElement {
           This page lists sites that make use of custom elements. Sites are
           automatically and anonymously added by users browsing the web with the
           <a
+            rel="noopener noreferrer"
             href="https://chrome.google.com/webstore/detail/custom-elements-locator/eccplgjbdhhakefbjfibfhocbmjpkafc"
             >Custom Elements Locator</a
           >
           browser extension.
         </p>
+
+        ${this.loading ? loading : ''}
         ${!this.error
           ? html`
               ${navigator.onLine
@@ -320,15 +304,20 @@ export class LocatorList extends LitElement {
                         `
                       )}
                     </ul>
+                    ${!this.loading
+                      ? !this.finished
+                        ? html`<button
+                            class="button find-more"
+                            @click=${this.getSites}
+                          >
+                            Find more
+                          </button>`
+                        : html`<p>No more sites found!</p>`
+                      : ''}
                   `
-                : html`<p>Uh oh! Looks like you're not online</p>`}
+                : html`<p>Uh oh! Looks like you're not online ☹️</p>`}
             `
           : html`<p>Something went wrong!</p>`}
-        ${navigator.onLine
-          ? !this.finished
-            ? html`<button @click=${this.getSites}>Find more</button>`
-            : html`<p>No more sites found!</p>`
-          : ''}
       </main>
 
       <p class="app-footer">

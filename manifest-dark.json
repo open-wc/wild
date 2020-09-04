@@ -1,8 +1,8 @@
 {
   "name": "Locator List",
   "short_name": "Locator",
-  "theme_color": "#ffffff",
-  "background_color": "#ffffff",
+  "theme_color": "#36393e",
+  "background_color": "#36393e",
   "display": "standalone",
   "orientation": "portrait",
   "Scope": "/",

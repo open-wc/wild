@@ -20,6 +20,7 @@
       --col-darker: #ededed;
       --col-light: #efefef;
       --col-active: blue;
+      --col-active-hover: rgba(0,0,255,0.1);
       --text-color: black;
       --text-color-inv: #ececec;
       --switch-track: #73767d;
@@ -33,6 +34,7 @@
       --col-darker: #26272b;
       --col-light: #36393e;
       --col-active: #41ffb0;
+      --col-active-hover: rgba(65,255,176,0.1);
       --text-color: #ececec;
       --text-color-inv: #ececec;
       --switch-track: #a4a4a4;
@@ -49,6 +51,138 @@
       background-color: var(--col-light);
     }
 
+    #dialog {
+      background-color: var(--col-light);
+      width: 450px;
+      height: 400px;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0px 2px 5px 0px rgba(0,0,0,0.75);
+      color: var(--text-color);
+      overflow: auto;
+    }
+
+    ul {
+      padding-left: 0;
+      list-style: none;
+    }
+
+    .changelog {
+      white-space: pre;
+    }
+
+    .button {
+      fill: var(--col-active);
+      background: transparent;
+      border: none;
+      display: block;
+      font-size: 16px;
+      /* line-height: 14px; */
+      color: var(--col-active);
+      position: relative;
+      border: solid 2px var(--col-active);
+      border-radius: 10px;
+      padding: 5px 10px 5px 10px;
+    }
+
+    .button:hover,
+    .button:active,
+    .button:focus {
+      background: var(--col-active-hover);
+    }
+
+    .dialog-buttons {
+      display: flex;
+    }
+
+    .dialog-buttons button:first-child {
+      margin-right: 10px;
+    }
+
+    .close {
+      margin-left: auto;
+      line-height: 14px;
+      padding: 5px 5px 5px 5px;
+    }
+
+    @media (max-width: 480px) {
+      #dialog {
+        width: calc(100vw - 40px);
+        height: 75vh;
+      }
+    }
+
+    .loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    flex-direction: column;
+    height: calc(100% - 60px);
+  }
+
+  .loading {
+    width: 40px;
+    height: 40px;
+    animation: rotate 2000ms linear infinite;
+    transform-origin: center center;
+    margin: auto;
+  }
+
+  .loading circle {
+    stroke-dasharray: 85, 200;
+    /* 0px is requires for edge 15 and lower */
+    stroke-dashoffset: 0px;
+    animation: dash 2000ms ease-in-out infinite;
+    stroke-linecap: round;
+    stroke-width: var(--spinner-stroke-width, 4px);
+    stroke-miterlimit: 10;
+    fill: none;
+    stroke: #828282;
+  }
+
+  @keyframes rotate {
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes dash {
+    0% {
+      stroke-dasharray: 1, 200;
+      /* 0px is requires for edge 15 and lower */
+      stroke-dashoffset: 0px;
+    }
+    50% {
+      stroke-dasharray: 89, 200;
+      stroke-dashoffset: -35px;
+    }
+    100% {
+      stroke-dasharray: 89, 200;
+      stroke-dashoffset: -124px;
+    }
+  }
+
+  /* Animating SVG does not work on IE11. Use a fallback animation. */
+  @media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
+    .loading svg {
+      animation-duration: 1500ms;
+    }
+
+    .loading circle {
+      stroke-linecap: square;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .loading svg {
+      animation-duration: 20000ms;
+    }
+
+    .loading circle {
+      animation: dash 20000ms ease-in-out infinite;
+    }
+  }
   </style>
   <title>Custom Elements in the wild</title>
   <script async src="https://www.googletagmanager.com/gtag/js?id=UA-177073154-1"></script>
@@ -67,36 +201,12 @@
 
   <script type="module" src="./src/locator-list.js"></script>
   <script>
-    async function handleServiceWorker() {
-      if ('serviceWorker' in navigator) {
-        const oldReg = await navigator.serviceWorker.getRegistration();
-        let oldSwState;
-        if (oldReg && oldReg.active) {
-          oldSwState = oldReg.active.state;
-        }
-
-        let refreshing;
-
-        navigator.serviceWorker.addEventListener('controllerchange', async () => {
-          if (refreshing) {
-            return;
-          }
-
-          const newReg = await navigator.serviceWorker.getRegistration();
-          let newSwState;
-          if (newReg && newReg.active) {
-            newSwState = newReg.active.state;
-          }
-
-          if (oldSwState === 'activated' && newSwState === 'activating') {
-            refreshing = true;
-            window.location.reload();
-          }
-        });
-      }
-    }
-
-    handleServiceWorker();
+    let refreshing;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (refreshing) return;
+      window.location.reload();
+      refreshing = true;
+    });
   </script>
 </body>
 
