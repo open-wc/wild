@@ -3,13 +3,10 @@ name: package-json-enforcer
 on: [pull_request]
 
 jobs:
-  build:
+  package-json-enforcer:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
         with:
-          ref: 'master'
-      - uses: actions/checkout@v2
-        with:
           fetch-depth: '0'
-      - uses: thepassle/changelog-enforcer@0.0.6
+      - uses: thepassle/package-json-enforcer@0.0.7

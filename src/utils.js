@@ -50,7 +50,7 @@ export function setupDarkmode(darkModeToggle) {
         case 'keydown':
           if (e.keyCode === 32 || e.keyCode === 13) {
             e.preventDefault();
-            handleToggle();
+            handleToggle(htmlEl);
           }
           break;
         case 'click':
@@ -69,6 +69,10 @@ export async function skipWaiting() {
 }
 
 export const switchStyles = () => css`
+  generic-switch {
+    --generic-switch-focus: 0 0 0 2px var(--col-active);
+  }
+
   generic-switch::part(button) {
     height: 20px;
     width: 40px;
