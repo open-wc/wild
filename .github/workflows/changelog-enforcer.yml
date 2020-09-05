@@ -1,0 +1,3 @@
+name: Changelog Enforcer
+uses: dangoslen/changelog-enforcer@v1.2.0
+on: [pull_request]
