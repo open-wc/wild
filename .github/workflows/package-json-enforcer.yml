@@ -8,6 +8,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
+          branch: 'master'
+      - uses: actions/checkout@v2
+        with:
           fetch-depth: '0'
       - uses: thepassle/changelog-enforcer@0.0.3
      
