@@ -1,4 +1,4 @@
-name: changelog-enforcer
+name: package-json-enforcer
 
 on: [pull_request]
 
@@ -6,6 +6,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-      - uses: dangoslen/changelog-enforcer@v1.2.0
-
+      - uses: actions/checkout@v2
+        with:
+          ref: 'master'
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: '0'
+      - uses: thepassle/changelog-enforcer@0.0.3
