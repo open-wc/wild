@@ -1,0 +1,12 @@
+name: package-json-enforcer
+
+on: [pull_request]
+
+jobs:
+  package-json-enforcer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: '0'
+      - uses: thepassle/package-json-enforcer@0.0.7
