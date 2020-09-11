@@ -31,9 +31,9 @@ export default merge(baseConfig, {
       flatten: false,
     }),
     {
-      name: 'version',
+      name: 'rewrite-version',
+      // eslint-disable-next-line
       load(id) {
-        // eslint-disable-line
         // replace the version module with a live version from the package.json
         if (id === versionModulePath) {
           return `export default '${packageJson.version}'`;
@@ -41,8 +41,8 @@ export default merge(baseConfig, {
       },
     },
     {
-      name: 'generateChangelog',
-      buildEnd() {
+      name: 'generate-changelog-json',
+      writeBundle() {
         const changelog = fs.readFileSync('./CHANGELOG.md', 'utf8');
         fs.writeFileSync(
           './dist/CHANGELOG.json',
