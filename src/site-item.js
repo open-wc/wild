@@ -95,10 +95,7 @@ class SiteItem extends LitElement {
       <a target="_blank" rel="noreferrer noopener" href="https://${this.site}"
         >#</a
       >
-      <generic-disclosure
-        @disclosure-opened=${this.toggleChevron}
-        @disclosure-closed=${this.toggleChevron}
-      >
+      <generic-disclosure @opened-changed=${this.toggleChevron}>
         <button slot="toggle">
           ${this.chevron ? chevronDown : chevronRight} ${this.site}
         </button>
