@@ -4,9 +4,6 @@ import { render } from 'lit-html';
 import { dialog } from '@thepassle/generic-components/generic-dialog/dialog.js';
 import { addPwaUpdateListener } from 'pwa-helper-components';
 
-import firebase from 'firebase/app';
-import 'firebase/firestore';
-
 import '@thepassle/generic-components/generic-disclosure.js';
 import '@thepassle/generic-components/generic-switch.js';
 import 'pwa-helper-components/pwa-update-available.js';
@@ -18,14 +15,6 @@ import './site-item.js';
 import './update-dialog.js';
 
 console.log(`[Custom Elements in the wild] version: ${version}`);
-
-firebase.initializeApp({
-  apiKey: 'AIzaSyDHaekG4-W4Zv7FLHdai8uqGwHKV0zKTpw',
-  authDomain: 'locator-a6a89.firebaseapp.com',
-  projectId: 'locator-a6a89',
-});
-
-const col = firebase.firestore().collection('sites');
 
 export class LocatorList extends LitElement {
   static get properties() {
@@ -195,17 +184,24 @@ export class LocatorList extends LitElement {
   async connectedCallback() {
     super.connectedCallback();
     try {
-      col
-        .orderBy('count', 'desc')
-        .limit(this.limit)
-        .get()
-        .then(({ docs }) => {
-          this.sites = [...this.sites, ...docs.map(doc => doc.data())];
-          this.lastVisible = docs[docs.length - 1];
+      const { total, data } = await (
+        await fetch(
+          `https://custom-elements-api.cleverapps.io/get?current=${this.sites.length}`,
+          {
+            method: 'get',
+            headers: {
+              'Content-Type': 'application/json',
+              'Access-Control-Allow-Origin': '*',
+            },
+          }
+        )
+      ).json();
 
-          this.error = false;
-          this.loading = false;
-        });
+      this.sites = [...this.sites, ...data];
+
+      this.finished = this.sites.length >= total;
+      this.error = false;
+      this.loading = false;
     } catch {
       this.error = true;
       this.loading = false;
@@ -216,22 +212,21 @@ export class LocatorList extends LitElement {
     });
   }
 
-  getSites() {
-    if (!this.finished) {
-      col
-        .orderBy('count', 'desc')
-        .startAfter(this.lastVisible)
-        .limit(this.limit)
-        .get()
-        .then(({ docs }) => {
-          this.sites = [...this.sites, ...docs.map(doc => doc.data())];
-          this.lastVisible = docs[docs.length - 1];
-
-          if (docs[docs.length - 1] === undefined) {
-            this.finished = true;
-          }
-        });
-    }
+  async getSites() {
+    const { total, data } = await (
+      await fetch(
+        `https://custom-elements-api.cleverapps.io/get?current=${this.sites.length}`,
+        {
+          method: 'get',
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+          },
+        }
+      )
+    ).json();
+    this.sites = [...this.sites, ...data];
+    this.finished = this.sites.length >= total;
   }
 
   firstUpdated() {
@@ -293,16 +288,16 @@ export class LocatorList extends LitElement {
               ${navigator.onLine
                 ? html`
                     <ul>
-                      ${this.sites.map(
-                        ({ site, components }) => html`
+                      ${this.sites.map(({ domain, customElements }) => {
+                        return html`
                           <li>
                             <site-item
-                              .site=${site}
-                              .components=${components}
+                              .site=${domain}
+                              .components=${customElements}
                             ></site-item>
                           </li>
-                        `
-                      )}
+                        `;
+                      })}
                     </ul>
                     ${!this.loading
                       ? !this.finished
@@ -312,7 +307,7 @@ export class LocatorList extends LitElement {
                           >
                             Find more
                           </button>`
-                        : html`<p>No more sites found!</p>`
+                        : ''
                       : ''}
                   `
                 : html`<p>Uh oh! Looks like you're not online ☹️</p>`}

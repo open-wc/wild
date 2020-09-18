@@ -10,7 +10,7 @@ const versionModulePath = require.resolve('./src/version.js');
 
 const baseConfig = createSpaConfig({
   workbox: {
-    globIgnores: ['./foo.json'],
+    globIgnores: ['./CHANGELOG.json'],
     skipWaiting: false,
     clientsClaim: false,
   },
