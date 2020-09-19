@@ -2,6 +2,7 @@
 
 ## 1.0.3
 - Removed firebase for better searchability in the future
+- Improved pagination experience
 
 ## 1.0.2
 - Added quick-links so users can visit a site easily

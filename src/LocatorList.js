@@ -8,33 +8,26 @@ import '@thepassle/generic-components/generic-disclosure.js';
 import '@thepassle/generic-components/generic-switch.js';
 import 'pwa-helper-components/pwa-update-available.js';
 
-import { reticle, loading, loadingStyles } from './icons/index.js';
+import { reticle } from './icons/index.js';
 import { switchStyles, setupDarkmode } from './utils.js';
 import version from './version.js';
-import './site-item.js';
 import './update-dialog.js';
+import './more-items.js';
 
 console.log(`[Custom Elements in the wild] version: ${version}`);
 
 export class LocatorList extends LitElement {
   static get properties() {
     return {
-      title: { type: String },
-      page: { type: String },
-      index: { type: Number },
-      limit: { type: Number },
-      sites: { type: Array },
-      error: { type: Boolean },
-      loading: { type: Boolean },
-      lastVisible: {},
+      allItems: { type: Array },
       finished: { type: Boolean },
+      error: { type: Boolean },
       updateAvailable: { type: Boolean },
     };
   }
 
   static get styles() {
     return css`
-      ${loadingStyles}
       :host {
         min-height: 100vh;
         display: flex;
@@ -52,48 +45,11 @@ export class LocatorList extends LitElement {
         display: flex;
       }
 
-      .button {
-        fill: var(--col-active);
-        background: transparent;
-        border: none;
-        display: block;
-        font-size: 16px;
-        /* line-height: 14px; */
-        color: var(--col-active);
-        position: relative;
-        border: solid 2px var(--col-active);
-        border-radius: 10px;
-        padding: 5px 10px 5px 10px;
-      }
-
-      .button:hover,
-      .button:active,
-      .button:focus {
-        background: var(--col-active-hover);
-      }
-
       .explainer {
         font-weight: 300;
         font-size: 24px;
         text-align: left;
         line-height: 34px;
-      }
-
-      button.load-more {
-        background-color: #2758ff;
-        border: 0;
-        border-radius: 10px;
-        color: var(--text-color-inv);
-        padding: 10px 20px 10px 20px;
-        font-weight: 700;
-        font-size: 16px;
-        border: solid 2px var(--border-col);
-      }
-
-      button:hover.load-more,
-      button:focus.load-more,
-      button:active.load-more {
-        background-color: #388cfa;
       }
 
       h1,
@@ -174,37 +130,23 @@ export class LocatorList extends LitElement {
 
   constructor() {
     super();
-    this.sites = [];
-    this.index = 0;
-    this.limit = 25;
     this.updateAvailable = false;
-    this.loading = true;
+    this.allItems = [[]];
   }
 
   async connectedCallback() {
     super.connectedCallback();
+
     try {
-      const { total, data } = await (
-        await fetch(
-          `https://custom-elements-api.cleverapps.io/get?current=${this.sites.length}`,
-          {
-            method: 'get',
-            headers: {
-              'Content-Type': 'application/json',
-              'Access-Control-Allow-Origin': '*',
-            },
-          }
-        )
-      ).json();
+      const { total, data } = await this.getItems();
+      this.allItems[0] = data;
 
-      this.sites = [...this.sites, ...data];
+      this.finished = this.allItems.flat().length >= total;
 
-      this.finished = this.sites.length >= total;
       this.error = false;
-      this.loading = false;
+      this.requestUpdate();
     } catch {
       this.error = true;
-      this.loading = false;
     }
 
     addPwaUpdateListener(updateAvailable => {
@@ -212,10 +154,32 @@ export class LocatorList extends LitElement {
     });
   }
 
-  async getSites() {
-    const { total, data } = await (
+  async loadMore() {
+    try {
+      const { length } = this.allItems;
+      this.allItems = [...this.allItems, []];
+      const { total, data } = await this.getItems();
+      this.allItems[length] = data;
+      this.finished = this.allItems.flat().length >= total;
+      this.loadMoreError = false;
+    } catch {
+      this.loadMoreError = true;
+    }
+
+    this.requestUpdate();
+  }
+
+  firstUpdated() {
+    const darkModeToggle = this.shadowRoot.getElementById('darkmode');
+    setupDarkmode(darkModeToggle);
+  }
+
+  async getItems() {
+    return (
       await fetch(
-        `https://custom-elements-api.cleverapps.io/get?current=${this.sites.length}`,
+        `https://custom-elements-api.cleverapps.io/get?current=${
+          this.allItems.flat().length
+        }`,
         {
           method: 'get',
           headers: {
@@ -225,13 +189,6 @@ export class LocatorList extends LitElement {
         }
       )
     ).json();
-    this.sites = [...this.sites, ...data];
-    this.finished = this.sites.length >= total;
-  }
-
-  firstUpdated() {
-    const darkModeToggle = this.shadowRoot.getElementById('darkmode');
-    setupDarkmode(darkModeToggle);
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -282,32 +239,30 @@ export class LocatorList extends LitElement {
           browser extension.
         </p>
 
-        ${this.loading ? loading : ''}
         ${!this.error
           ? html`
               ${navigator.onLine
                 ? html`
                     <ul>
-                      ${this.sites.map(({ domain, customElements }) => {
-                        return html`
-                          <li>
-                            <site-item
-                              .site=${domain}
-                              .components=${customElements}
-                            ></site-item>
-                          </li>
-                        `;
-                      })}
-                    </ul>
-                    ${!this.loading
-                      ? !this.finished
-                        ? html`<button
-                            class="button find-more"
-                            @click=${this.getSites}
+                      ${this.allItems.map(
+                        items => html`
+                          <more-items
+                            .shouldFocus=${this.allItems.length > 1}
+                            .finished=${this.finished}
+                            .items=${items}
+                            .error=${this.loadMoreError}
+                            @load-more=${this.loadMore}
                           >
-                            Find more
-                          </button>`
-                        : ''
+                          </more-items>
+                        `
+                      )}
+                    </ul>
+
+                    ${this.loadMoreError
+                      ? html`<p>
+                          Something went wrong loading more sites. Please try
+                          again later.
+                        </p>`
                       : ''}
                   `
                 : html`<p>Uh oh! Looks like you're not online ☹️</p>`}

@@ -20,6 +20,7 @@ class SiteItem extends LitElement {
       }
 
       a {
+        height: 50px;
         line-height: 50px;
         color: var(--col-active);
         text-decoration: none;
