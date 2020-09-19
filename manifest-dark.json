@@ -1,7 +1,7 @@
 {
-  "name": "Locator List",
-  "short_name": "Locator",
-  "theme_color": "#36393e",
+  "name": "Custom elements in the wild",
+  "short_name": "Wild",
+  "theme_color": "#2f3136",
   "background_color": "#36393e",
   "display": "standalone",
   "orientation": "portrait",
