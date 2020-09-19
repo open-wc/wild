@@ -20,6 +20,7 @@
       --col-darker: #ededed;
       --col-light: #efefef;
       --col-active: blue;
+      --col-active-lighter: #8282ff;
       --col-active-hover: rgba(0,0,255,0.1);
       --text-color: black;
       --text-color-inv: #ececec;
@@ -27,6 +28,11 @@
       --switch-thumb: white;
       --border-col: #d2d2d2;
       --component-color: rgb(33, 127, 249);
+      --input-placeholder: #7d7d7d;
+      --input-text-color: black;
+      --input-bg: white;
+      --input-bg-hover: #f1f1f1;
+      --input-border: #d8d8d8;
     }
 
     html.dark {
@@ -34,6 +40,7 @@
       --col-darker: #26272b;
       --col-light: #36393e;
       --col-active: #41ffb0;
+      --col-active-lighter: #b4ffe0;
       --col-active-hover: rgba(65,255,176,0.1);
       --text-color: #ececec;
       --text-color-inv: #ececec;
@@ -41,6 +48,18 @@
       --switch-thumb: white;
       --border-col: rgb(77, 77, 77);
       --component-color: rgb(175, 210, 255);
+      --input-placeholder: #c1c1c1;
+      --input-text-color: white;
+      --input-bg: #5a5c63;
+      --input-bg-hover: #6c6e75;
+      --input-border: #26272b;
+    }
+
+    *:focus {
+      outline: 0;
+      border-radius: 5px;
+      box-shadow: 0 0 0 2px var(--col-active)!important;
+      transition: box-shadow .1s ease-in-out;
     }
 
     html,

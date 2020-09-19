@@ -1,6 +1,6 @@
 /* eslint-disable no-nested-ternary */
 import { LitElement, html, css } from 'lit-element';
-import { loading, loadingStyles } from './icons/index.js';
+import { focusStyles } from './utils.js';
 import './site-item.js';
 
 class MoreItems extends LitElement {
@@ -10,14 +10,12 @@ class MoreItems extends LitElement {
       loadMoreClicked: { type: Boolean },
       finished: { type: Boolean },
       error: { type: Boolean },
-      shouldFocus: { type: Boolean },
     };
   }
 
   static get styles() {
     return css`
-      ${loadingStyles}
-
+      ${focusStyles()}
       :host {
         display: block;
       }
@@ -56,7 +54,6 @@ class MoreItems extends LitElement {
     this.loadMoreClicked = false;
     this.finished = false;
     this.error = false;
-    this.shouldFocus = false;
   }
 
   loadMore() {
@@ -70,24 +67,16 @@ class MoreItems extends LitElement {
     if (
       changedProperties &&
       changedProperties.get('items') &&
-      this.items.length > 0 &&
-      this.shouldFocus
+      this.items.length > 0
     ) {
-      const siteItem = this.shadowRoot.querySelector('site-item');
-      await siteItem.updateComplete;
-      const disclosure = siteItem.shadowRoot
-        .querySelector('generic-disclosure')
-        .querySelector('button');
-      disclosure.focus();
+      this.loadMoreClicked = false;
     }
   }
 
   render() {
     return html`
       ${this.items.length === 0
-        ? this.error
-          ? ''
-          : loading
+        ? ''
         : html`
             <ul>
               ${this.items.map(

@@ -3,6 +3,7 @@
 import { html, css, LitElement } from 'lit-element';
 import '@thepassle/generic-components/generic-disclosure.js';
 import { chevronRight, chevronDown } from './icons/index.js';
+import { focusStyles } from './utils.js';
 
 class SiteItem extends LitElement {
   static get properties() {
@@ -15,6 +16,7 @@ class SiteItem extends LitElement {
 
   static get styles() {
     return css`
+      ${focusStyles()}
       :host {
         display: flex;
       }
@@ -36,8 +38,8 @@ class SiteItem extends LitElement {
       button {
         line-height: 24px;
         border-radius: 7px;
-        border: solid 3px var(--border-col);
-        background-color: var(--col-dark);
+        border: solid 2px var(--input-border);
+        background-color: var(--input-bg);
       }
 
       generic-disclosure {
@@ -45,13 +47,16 @@ class SiteItem extends LitElement {
         margin-bottom: 20px;
       }
 
-      button:hover,
-      button:focus {
-        background-color: var(--col-dark);
-        border: solid 3px var(--col-active);
+      button:hover {
+        box-shadow: 0 0 0 2px var(--col-active) !important;
+      }
+
+      button:active:hover {
+        background-color: var(--input-bg-hover);
       }
 
       div[slot='detail'] {
+        border: solid 2px var(--input-border);
         background-color: var(--col-dark);
         margin-top: 10px;
         border-radius: 7px;
