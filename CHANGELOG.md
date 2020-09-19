@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.0
+- Added search functionality 🎉
+- Many small design changes
+- Fixed darkmode bug
+- Fixed a service worker bug
+
 ## 1.0.3
 - Removed firebase for better searchability in the future
 - Improved pagination experience

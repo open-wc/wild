@@ -28,7 +28,6 @@ function handleToggle(htmlEl) {
 
 export function setupDarkmode(darkModeToggle) {
   const htmlEl = document.getElementsByTagName('html')[0];
-  handleToggle(htmlEl);
 
   installDarkModeHandler(darkmode => {
     const manifest = document.querySelector("link[rel='manifest']");
@@ -68,9 +67,25 @@ export async function skipWaiting() {
   reg.waiting.postMessage({ type: 'SKIP_WAITING' });
 }
 
+export const focusStyles = () => css`
+  *:focus {
+    outline: 0;
+    border-radius: 5px;
+    box-shadow: 0 0 0 2px var(--col-active) !important;
+    transition: box-shadow 0.2s ease-in-out;
+  }
+`;
+
 export const switchStyles = () => css`
   generic-switch {
     --generic-switch-focus: 0 0 0 2px var(--col-active);
+  }
+
+  generic-switch::part(button):focus {
+    outline: 0;
+    border-radius: 5px;
+    box-shadow: 0 0 0 0px var(--col-active) !important;
+    transition: box-shadow 0.1s ease-in-out;
   }
 
   generic-switch::part(button) {
