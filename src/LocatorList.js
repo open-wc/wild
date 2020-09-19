@@ -393,9 +393,6 @@ export class LocatorList extends LitElement {
                         )}
                       </ul>
 
-                      ${this.allItems.flat().length === 0
-                        ? html`<p>No results.</p>`
-                        : ''}
                       ${this.loading ? loading : ''}
                       ${this.loadMoreError
                         ? html`<p>
