@@ -140,7 +140,6 @@ export class LocatorList extends LitElement {
       generic-switch {
         height: auto;
         display: block;
-        width: max-content;
         font-size: 16px;
       }
 
@@ -198,6 +197,11 @@ export class LocatorList extends LitElement {
       .button:active,
       .button:focus {
         background: var(--col-active-hover);
+      }
+
+      .switch-container,
+      .update-container {
+        width: 60px;
       }
 
       @media (max-width: 960px) {
@@ -346,10 +350,12 @@ export class LocatorList extends LitElement {
             <input aria-label="Search tagname or domain" placeholder="Search tagname or domain" name="query" type="text"></input>
           </form>
 
-          <generic-switch
-            id="darkmode"
-            label="Toggle darkmode"
-          ></generic-switch>
+          <div class="switch-container">
+            <generic-switch
+              id="darkmode"
+              label="Toggle darkmode"
+            ></generic-switch>
+          </div>
         </div>
       </header>
       <main>
