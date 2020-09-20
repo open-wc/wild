@@ -2,6 +2,13 @@ import { html, css } from 'lit-element';
 import { satisfies } from 'es-semver';
 import { installDarkModeHandler } from 'pwa-helper-components';
 
+/** @typedef {import('lit-element').CSSResult} CSSResult */
+/** @typedef {import('lit-element').TemplateResult} TemplateResult */
+
+/**
+ * @param {string} version
+ * @returns {Promise<TemplateResult[]>}
+ */
 export async function getChanged(version) {
   const { Changelog } = await (await fetch('./CHANGELOG.json')).json();
   return Object.keys(Changelog)
@@ -16,6 +23,9 @@ export async function getChanged(version) {
     );
 }
 
+/**
+ * @param {HTMLElement} htmlEl
+ */
 function handleToggle(htmlEl) {
   if (htmlEl.classList.contains('dark')) {
     htmlEl.classList.remove('dark');
@@ -26,11 +36,16 @@ function handleToggle(htmlEl) {
   }
 }
 
+/**
+ * @param {HTMLElement} darkModeToggle
+ */
 export function setupDarkmode(darkModeToggle) {
   const htmlEl = document.getElementsByTagName('html')[0];
 
   installDarkModeHandler(darkmode => {
-    const manifest = document.querySelector("link[rel='manifest']");
+    const manifest = /** @type {HTMLLinkElement} */ (document.querySelector(
+      "link[rel='manifest']"
+    ));
 
     if (darkmode) {
       manifest.href = '/manifest-dark.json';
@@ -44,29 +59,37 @@ export function setupDarkmode(darkModeToggle) {
   });
 
   ['keydown', 'click'].forEach(event => {
-    darkModeToggle.addEventListener(event, e => {
-      switch (event) {
-        case 'keydown':
-          if (e.keyCode === 32 || e.keyCode === 13) {
-            e.preventDefault();
+    darkModeToggle.addEventListener(
+      event,
+      /** @type {KeyboardEvent} */ e => {
+        const { keyCode } = /** @type {KeyboardEvent} */ (e);
+        switch (event) {
+          case 'keydown':
+            if (keyCode === 32 || keyCode === 13) {
+              e.preventDefault();
+              handleToggle(htmlEl);
+            }
+            break;
+          case 'click':
             handleToggle(htmlEl);
-          }
-          break;
-        case 'click':
-          handleToggle(htmlEl);
-          break;
-        default:
-          break;
+            break;
+          default:
+            break;
+        }
       }
-    });
+    );
   });
 }
 
+/**
+ * @returns {Promise<void>}
+ */
 export async function skipWaiting() {
   const reg = await navigator.serviceWorker.getRegistration();
   reg.waiting.postMessage({ type: 'SKIP_WAITING' });
 }
 
+/** @type {() => CSSResult} */
 export const focusStyles = () => css`
   *:focus {
     outline: 0;
@@ -76,6 +99,7 @@ export const focusStyles = () => css`
   }
 `;
 
+/** @type {() => CSSResult} */
 export const switchStyles = () => css`
   generic-switch {
     --generic-switch-focus: 0 0 0 2px var(--col-active);

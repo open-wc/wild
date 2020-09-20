@@ -87,8 +87,11 @@ class SiteItem extends LitElement {
 
   constructor() {
     super();
+    /** @type {string} - domainname */
     this.site = '';
+    /** @type {string[]} */
     this.components = [];
+    /** @type {boolean} */
     this.chevron = false;
   }
 

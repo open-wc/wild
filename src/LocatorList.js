@@ -14,6 +14,18 @@ import version from './version.js';
 import './update-dialog.js';
 import './more-items.js';
 
+/**
+ * @typedef {Object} Document
+ * @property {string} domain
+ * @property {string[]} customElements
+ */
+
+/**
+ * @typedef {Object} ApiReponse
+ * @property {number} total
+ * @property {Document[]} data
+ */
+
 console.log(`[Custom Elements in the wild] version: ${version}`);
 
 export class LocatorList extends LitElement {
@@ -230,9 +242,13 @@ export class LocatorList extends LitElement {
 
   constructor() {
     super();
+    /** @type {boolean} - show PWA update available button */
     this.updateAvailable = false;
+    /** @type {Array<Document[]>} */
     this.allItems = [[]];
+    /** @type {string} */
     this.endpoint = 'get';
+    /** @type {boolean} */
     this.loading = true;
   }
 
@@ -281,6 +297,9 @@ export class LocatorList extends LitElement {
     setupDarkmode(darkModeToggle);
   }
 
+  /**
+   * @returns {Promise<ApiReponse>}
+   */
   async getItems() {
     return (
       await fetch(

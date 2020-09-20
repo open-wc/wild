@@ -3,6 +3,8 @@ import { LitElement, html, css } from 'lit-element';
 import { focusStyles } from './utils.js';
 import './site-item.js';
 
+/** @typedef {import('./LocatorList').Document} Document */
+
 class MoreItems extends LitElement {
   static get properties() {
     return {
@@ -50,9 +52,13 @@ class MoreItems extends LitElement {
 
   constructor() {
     super();
+    /** @type {Document[]} */
     this.items = [];
+    /** @type {boolean} */
     this.loadMoreClicked = false;
+    /** @type {boolean} */
     this.finished = false;
+    /** @type {boolean} */
     this.error = false;
   }
 
