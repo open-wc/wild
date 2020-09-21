@@ -28,6 +28,9 @@ import './more-items.js';
 
 console.log(`[Custom Elements in the wild] version: ${version}`);
 
+/**
+ * @extends {LitElement}
+ */
 export class LocatorList extends LitElement {
   static get properties() {
     return {
