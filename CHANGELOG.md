@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.1.1
+- Fixed offline state indicator
+
 ## 1.1.0
 - Added search functionality 🎉
 - Many small design changes
