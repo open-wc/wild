@@ -403,33 +403,31 @@ export class LocatorList extends LitElement {
         </p>
 
         ${
-          !this.error
+          !navigator.onLine
+            ? html`<p>Uh oh! Looks like you're not online ☹️</p>`
+            : !this.error
             ? html`
-                ${navigator.onLine
-                  ? html`
-                      <ul>
-                        ${this.allItems.map(
-                          items => html`
-                            <more-items
-                              .finished=${this.finished}
-                              .items=${items}
-                              .error=${this.loadMoreError}
-                              @load-more=${this.loadMore}
-                            >
-                            </more-items>
-                          `
-                        )}
-                      </ul>
-
-                      ${this.loading ? loading : ''}
-                      ${this.loadMoreError
-                        ? html`<p>
-                            Something went wrong loading more sites. Please try
-                            again later.
-                          </p>`
-                        : ''}
+                <ul>
+                  ${this.allItems.map(
+                    items => html`
+                      <more-items
+                        .finished=${this.finished}
+                        .items=${items}
+                        .error=${this.loadMoreError}
+                        @load-more=${this.loadMore}
+                      >
+                      </more-items>
                     `
-                  : html`<p>Uh oh! Looks like you're not online ☹️</p>`}
+                  )}
+                </ul>
+
+                ${this.loading ? loading : ''}
+                ${this.loadMoreError
+                  ? html`<p>
+                      Something went wrong loading more sites. Please try again
+                      later.
+                    </p>`
+                  : ''}
               `
             : html`<p>Something went wrong!</p>`
         }
