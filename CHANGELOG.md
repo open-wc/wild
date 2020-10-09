@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.1.2
+- Added total number of indexed items
+
 ## 1.1.1
 - Fixed offline state indicator
 
