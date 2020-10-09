@@ -35,6 +35,7 @@ export class LocatorList extends LitElement {
   static get properties() {
     return {
       allItems: { type: Array },
+      totalItems: { type: Number },
       finished: { type: Boolean },
       error: { type: Boolean },
       updateAvailable: { type: Boolean },
@@ -253,6 +254,8 @@ export class LocatorList extends LitElement {
     this.endpoint = 'get';
     /** @type {boolean} */
     this.loading = true;
+    /** @type {number} */
+    this.totalItems = 0;
   }
 
   async connectedCallback() {
@@ -261,6 +264,7 @@ export class LocatorList extends LitElement {
     try {
       const { total, data } = await this.getItems();
       this.allItems[0] = data;
+      this.totalItems = total;
 
       this.finished = this.allItems.flat().length >= total;
 
@@ -399,9 +403,10 @@ export class LocatorList extends LitElement {
             href="https://chrome.google.com/webstore/detail/custom-elements-locator/eccplgjbdhhakefbjfibfhocbmjpkafc"
             >Custom Elements Locator</a
           >
-          browser extension.
+          browser extension. Currently, ${
+            this.totalItems
+          } sites have been indexed.
         </p>
-
         ${
           !navigator.onLine
             ? html`<p>Uh oh! Looks like you're not online ☹️</p>`
