@@ -407,6 +407,7 @@ export class LocatorList extends LitElement {
             this.totalItems
           } sites have been indexed.
         </p>
+        
         ${
           !navigator.onLine
             ? html`<p>Uh oh! Looks like you're not online ☹️</p>`
